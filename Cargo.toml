@@ -1,0 +1,8 @@
+[package]
+
+name = "hack"
+version = "0.0.1"
+authors = ["Paul Collier <paul@paulcollier.ca>"]
+
+[dependencies.ncurses]
+git = "https://github.com/pshc/ncurses-rs.git"
