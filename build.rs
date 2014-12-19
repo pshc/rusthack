@@ -1,7 +1,8 @@
 
 #[cfg(target_os = "macos")]
 mod osx {
-    use std::io::fs::copy;
+    use std::io::fs;
+    use std::io::fs::PathExtensions;
 
     const TCOD_PATH: &'static str = "../libtcod";
 
@@ -10,11 +11,18 @@ mod osx {
         let cwd = Path::new(file!()).dir_path();
         let tcod = cwd.join(TCOD_PATH);
 
-        // provide dylib path
-        println!("cargo:rustc-flags=-L {}", tcod.display());
+        // copy libraries
+        for entry in fs::readdir(&tcod).unwrap().iter() {
+            if entry.is_file() {
+                let filename = entry.filename_str().expect("couldn't get dylib filename");
+                if filename.ends_with(".dylib") {
+                    fs::copy(entry, &cwd.join(filename)).unwrap();
+                }
+            }
+        }
 
         // copy resources
-        copy(&tcod.join("terminal.png"), &cwd.join("terminal.png")).unwrap();
+        fs::copy(&tcod.join("terminal.png"), &cwd.join("terminal.png")).unwrap();
     }
 }
 
