@@ -3,7 +3,6 @@ use tcod;
 
 #[deriving(Eq, PartialEq, Show)]
 pub enum Key {
-    Unknown,
     Escape,
     Up,
     Down,
@@ -11,18 +10,18 @@ pub enum Key {
     Right,
 }
 
-fn map_key(key: tcod::Key) -> Key {
+fn map_key(key: tcod::Key) -> Option<Key> {
     use tcod::Key::{Printable, Special};
     use tcod::KeyCode;
 
-    match key {
+    Some(match key {
         Special(KeyCode::Up) | Printable('k') => Up,
         Special(KeyCode::Down) | Printable('j') => Down,
         Special(KeyCode::Left) | Printable('h') => Left,
         Special(KeyCode::Right) | Printable('l') => Right,
         Special(KeyCode::Escape) | Printable('q') => Escape,
-        _ => Unknown
-    }
+        _ => { return None; }
+    })
 }
 
 pub struct Io {
@@ -36,16 +35,23 @@ impl Io {
         }
     }
 
-    pub fn get_key(&mut self) -> Key {
+    pub fn get_key(&mut self) -> Option<Key> {
         let k = tcod::Console::wait_for_keypress(true);
         if k.pressed {
             map_key(k.key)
         }
+        else if self.window_closed() {
+            None
+        }
         else {
             // was a keyup event; try one more time
             let k = tcod::Console::wait_for_keypress(true);
-            assert!(k.pressed, "I need a damn key already");
-            map_key(k.key)
+            if k.pressed {
+                map_key(k.key)
+            }
+            else {
+                None
+            }
         }
     }
 
