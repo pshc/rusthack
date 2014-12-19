@@ -3,6 +3,7 @@
 name = "hack"
 version = "0.0.1"
 authors = ["Paul Collier <paul@paulcollier.ca>"]
+build = "build.rs"
 
-[dependencies.ncurses]
-git = "https://github.com/pshc/ncurses-rs.git"
+[dependencies.tcod]
+git = "https://github.com/jaywuuu/tcod-rs.git"
