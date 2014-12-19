@@ -1,7 +1,5 @@
-use ncurses::*;
 use self::Key::*;
-use std::os::setenv;
-use std::ptr::null_mut;
+use tcod;
 
 #[deriving(Eq, PartialEq, Show)]
 pub enum Key {
@@ -13,66 +11,45 @@ pub enum Key {
     Right,
 }
 
-pub fn get_key() -> Key {
-    match getch() {
-        104 | KEY_LEFT  => Left,
-        106 | KEY_DOWN  => Down,
-        107 | KEY_UP    => Up,
-        108 | KEY_RIGHT => Right,
+fn map_key(key: tcod::Key) -> Key {
+    use tcod::Key::{Printable, Special};
+    use tcod::KeyCode;
 
-        27 | 113 => Escape,
-        k => {
-            printw(format!("unknown key: {}", k).as_slice());
-            Unknown
-        }
+    match key {
+        Special(KeyCode::Up) | Printable('k') => Up,
+        Special(KeyCode::Down) | Printable('j') => Down,
+        Special(KeyCode::Left) | Printable('h') => Left,
+        Special(KeyCode::Right) | Printable('l') => Right,
+        Special(KeyCode::Escape) | Printable('q') => Escape,
+        _ => Unknown
     }
 }
 
-pub fn setup() {
-    setenv("ESCDELAY", "25");
-    initscr();
-    signal::setup();
-
-    intrflush(null_mut(), false);
-    noecho();
-    curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
-    keypad(stdscr, true);
-    nonl(); // plain newlines
-    cbreak(); // char-at-a-time input
+pub struct Io {
+    pub con: tcod::Console,
 }
 
-pub fn teardown() {
-    clear();
-    refresh();
-    endwin();
-    println!("Thanks for playing.");
-}
-
-mod signal {
-    use libc::c_int;
-    use libc::consts::os::posix88::SIGINT;
-    use libc::funcs::posix01::signal::signal;
-    use libc::funcs::posix88::signal::kill;
-    use libc::funcs::posix88::unistd::getpid;
-    use ncurses::endwin;
-    use std::mem::transmute;
-
-    static SIG_DFL: u64 = 0;
-
-    unsafe extern "C" fn interrupt(sig: c_int) {
-        // don't handle again
-        signal(sig, SIG_DFL);
-        assert_eq!(sig, SIGINT);
-        // clean up
-        endwin();
-        println!("Interrupted!");
-        // signal again
-        kill(getpid(), sig);
+impl Io {
+    pub fn new() -> Io {
+        Io {
+            con: tcod::Console::init_root(80, 50, "HACK", false),
+        }
     }
 
-    pub fn setup() {
-        unsafe {
-            signal(SIGINT, transmute(interrupt));
+    pub fn get_key(&mut self) -> Key {
+        let k = tcod::Console::wait_for_keypress(true);
+        if k.pressed {
+            map_key(k.key)
         }
+        else {
+            // was a keyup event; try one more time
+            let k = tcod::Console::wait_for_keypress(true);
+            assert!(k.pressed, "I need a damn key already");
+            map_key(k.key)
+        }
+    }
+
+    pub fn window_closed(&self) -> bool {
+        tcod::Console::window_closed()
     }
 }
