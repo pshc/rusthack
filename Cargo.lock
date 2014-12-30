@@ -8,5 +8,13 @@ dependencies = [
 [[package]]
 name = "tcod"
 version = "0.3.0"
-source = "git+https://github.com/jaywuuu/tcod-rs.git#9c5da97b1e52b4f57770639ffe4dfdb0a35c5a19"
+source = "git+https://github.com/jaywuuu/tcod-rs.git#a732eb4608c25e78b438a8371ed3b6f36cdbad22"
+dependencies = [
+ "tcod-sys 1.5.2 (git+https://github.com/jaywuuu/tcod-rs.git)",
+]
+
+[[package]]
+name = "tcod-sys"
+version = "1.5.2"
+source = "git+https://github.com/jaywuuu/tcod-rs.git#a732eb4608c25e78b438a8371ed3b6f36cdbad22"
 
