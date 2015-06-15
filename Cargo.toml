@@ -5,5 +5,5 @@ version = "0.0.1"
 authors = ["Paul Collier <paul@paulcollier.ca>"]
 build = "build.rs"
 
-[dependencies.tcod]
-git = "https://github.com/jaywuuu/tcod-rs.git"
+[dependencies]
+tcod = "*"

@@ -1,4 +1,4 @@
-#[deriving(Copy, Eq, PartialEq, Show)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct Pos { pub x: u8, pub y: u8 }
 
 impl Pos {

@@ -1,7 +1,7 @@
 use self::Key::*;
 use tcod;
 
-#[deriving(Eq, PartialEq, Show)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum Key {
     Escape,
     Up,
@@ -10,9 +10,9 @@ pub enum Key {
     Right,
 }
 
-fn map_key(key: tcod::Key) -> Option<Key> {
-    use tcod::Key::{Printable, Special};
-    use tcod::KeyCode;
+fn map_key(key: tcod::input::Key) -> Option<Key> {
+    use tcod::input::Key::{Printable, Special};
+    use tcod::input::KeyCode;
 
     Some(match key {
         Special(KeyCode::Up) | Printable('k') => Up,
@@ -25,27 +25,30 @@ fn map_key(key: tcod::Key) -> Option<Key> {
 }
 
 pub struct Io {
-    pub con: tcod::Console,
+    pub con: tcod::RootConsole,
 }
 
 impl Io {
     pub fn new() -> Io {
         Io {
-            con: tcod::Console::init_root(80, 50, "HACK", false),
+            con: tcod::RootConsole::initializer()
+                .size(80, 50)
+                .title("HACK")
+                .init(),
         }
     }
 
     pub fn get_key(&mut self) -> Option<Key> {
-        let k = tcod::Console::wait_for_keypress(true);
+        let k = self.con.wait_for_keypress(true);
         if k.pressed {
             map_key(k.key)
         }
-        else if self.window_closed() {
+        else if self.con.window_closed() {
             None
         }
         else {
             // was a keyup event; try one more time
-            let k = tcod::Console::wait_for_keypress(true);
+            let k = self.con.wait_for_keypress(true);
             if k.pressed {
                 map_key(k.key)
             }
@@ -56,6 +59,6 @@ impl Io {
     }
 
     pub fn window_closed(&self) -> bool {
-        tcod::Console::window_closed()
+        self.con.window_closed()
     }
 }
