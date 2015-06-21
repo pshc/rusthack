@@ -1,9 +1,9 @@
 use ncurses::*;
 use self::Key::*;
-use std::os::setenv;
+use std::env;
 use std::ptr::null_mut;
 
-#[deriving(Eq, PartialEq, Show)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum Key {
     Unknown,
     Escape,
@@ -22,14 +22,14 @@ pub fn get_key() -> Key {
 
         27 | 113 => Escape,
         k => {
-            printw(format!("unknown key: {}", k).as_slice());
+            printw(&format!("unknown key: {}", k)[..]);
             Unknown
         }
     }
 }
 
 pub fn setup() {
-    setenv("ESCDELAY", "25");
+    env::set_var("ESCDELAY", "25");
     initscr();
     signal::setup();
 

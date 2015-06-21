@@ -8,6 +8,6 @@ pub fn render(level: &Level) {
 }
 
 fn put(c: char, pos: Pos) {
-    mvaddch(pos.y as i32, pos.x as i32, c as u32);
+    mvaddch(pos.y as i32, pos.x as i32, c as u64);
 }
 
